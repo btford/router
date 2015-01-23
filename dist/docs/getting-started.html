@@ -1,0 +1,94 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>New Angular Router</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="style.css" rel="stylesheet">
+  <link href="highlight.css" rel="stylesheet">
+</head>
+<body lang="en">
+  
+<h1>Getting Started</h1><p>These are instuctions for starting a new app with the New Router with AngularJS 1.4.</p>
+<h2 id="-project-structure"><a class="anchor" href="#-project-structure"><span class="header-link"></span></a>Project Structure</h2><p>Make a new directory and <code>cd</code> into it.</p>
+<p>We&#39;re going to organize our code like this, and assume we have a simple HTTP server
+that serves files at a path corresponding to their location within the file system.</p>
+<pre><code>index.html
+package.json
+components/
+├── app/
+│   ├── app.html
+│   └── app.js
+├── ...
+node_modules/
+└── ...
+</code></pre><p>We&#39;ll use <code>npm</code> to install Angular and the New Router.</p>
+<p>Let&#39;s start with the contents of <code>index.html</code>:</p>
+<pre><code class="lang-html">&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;base href=&quot;/&quot;&gt;
+  &lt;title&gt;My app&lt;/title&gt;
+&lt;/head&gt;
+&lt;body ng-app=&quot;myApp&quot;&gt;
+  &lt;div router-component=&quot;app&quot;&gt;&lt;/div&gt;
+
+  &lt;script src=&quot;/node_modules/angular/angular.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;/dist/router.es5.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;/app/app.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>This is a pretty typical angular app, except the <code>router-component</code> directive.
+Let&#39;s talk about that for a bit.</p>
+<h2 id="-a-component"><a class="anchor" href="#-a-component"><span class="header-link"></span></a>A component</h2><p>In addition to the directive in our <code>index.html</code>, you probably noticed that we have a directory called <code>components</code>.</p>
+<p>What&#39;s all this &quot;component&quot; stuff?</p>
+<p>In Angular 1, a &quot;routable component&quot; is a template and a controller.</p>
+<!--
+<aside class="implementation detail">
+In Angular 2, the DI system understands how to... .
+
+In Angular 1, we need this component system to hook up child routers.
+</aside>
+-->
+
+<p>A component&#39;s template can have &quot;view ports,&quot; which are holes in the DOM for loading parts of your app based on the route configuration.</p>
+<p>A component&#39;s controller can have a router.</p>
+<p>A component&#39;s router tells the component what to put inside the view ports based on URL.
+The configuration maps routes to components for each viewport.</p>
+<p>Let&#39;s see what this looks like:</p>
+<p><code>app/app.js</code></p>
+<pre><code class="lang-js"><span class="identifier">angular</span>.<span class="identifier">module</span>(<span class="string">'app'</span>, <span class="identifier">AppController</span>);
+
+<span class="keyword">function</span> <span class="identifier">AppController</span> (<span class="param">router</span>) {
+  <span class="identifier">router</span>.<span class="identifier">config</span>([
+    {<span class="identifier">path</span>: <span class="string">''</span>, <span class="identifier">component</span>: <span class="string">'detail'</span> }
+  ]);
+}
+</code></pre>
+<h2 id="-linking-to-routes"><a class="anchor" href="#-linking-to-routes"><span class="header-link"></span></a>Linking to routes</h2><p>How do we link routes?</p>
+<h2 id="-nesting-routes"><a class="anchor" href="#-nesting-routes"><span class="header-link"></span></a>Nesting Routes</h2><pre><code class="lang-js"><span class="identifier">module</span>.<span class="identifier">controller</span>(<span class="string">'PhoneListController'</span>, <span class="keyword">function</span> (<span class="param">router</span>) {
+  <span class="identifier">router</span>.<span class="identifier">config</span>([
+    {<span class="identifier">path</span>: <span class="string">''</span>, <span class="identifier">component</span>: <span class="string">'detail'</span> }
+  ]);
+});
+</code></pre>
+<h2 id="-multiple-viewports"><a class="anchor" href="#-multiple-viewports"><span class="header-link"></span></a>Multiple Viewports</h2><p>A component can have multiple viewports:</p>
+<p><code>multiview.html</code></p>
+<pre><code class="lang-html">&lt;div class=&quot;container&quot;&gt;
+  &lt;div ng-view-port=&quot;left&quot;&gt;&lt;/div&gt;
+  &lt;div ng-view-port=&quot;right&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Viewports are named with the <code>ng-view-port</code> attribute.</p>
+<p>They are then configured like this:</p>
+<p><code>multiview.js</code></p>
+<pre><code class="lang-js"><span class="identifier">router</span>.<span class="identifier">config</span>([
+  { <span class="identifier">path</span>: <span class="string">'/'</span>, <span class="identifier">components</span>: { <span class="identifier">left</span>: <span class="string">'tree'</span>, <span class="identifier">right</span>: <span class="string">'detail'</span> } }
+]);
+</code></pre>
+<h2 id="-additional-reading"><a class="anchor" href="#-additional-reading"><span class="header-link"></span></a>Additional reading</h2><p>See the <code>examples/</code> directory for common recipes.</p>
+
+
+</body>
+</html>

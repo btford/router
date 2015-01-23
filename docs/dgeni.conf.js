@@ -29,6 +29,7 @@ package.config(function(log, readFilesProcessor, templateFinder, templateEngine,
   // Specify collections of source files that should contain the documentation to extract
   readFilesProcessor.sourceFiles = [
     { include: 'src/**/*.js', basePath: 'src' },
+    //{ include: 'src/**/*.ats', basePath: 'src' },
     { include: 'docs/content/**/*.md', basePath: 'docs/content' }
   ];
 
@@ -79,6 +80,10 @@ config(function(computePathsProcessor) {
     pathTemplate: '${id}',
     outputPathTemplate: '${path}.html'
   });
+}).
+config(function(jsdocFileReader) {
+  // treat *.ats as *.js
+  // jsdocFileReader.defaultPattern = /\.(ats|js)$/;
 });
 
 module.exports = package;

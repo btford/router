@@ -1,7 +1,9 @@
-/*
- * This is for Angular 1.3
+/**
+ * @name ngFuturisticRouter
+ *
+ * @description
+ * A module for adding new a routing system Angular 1.
  */
-
 angular.module('ngFuturisticRouter', ['ngFuturisticRouter.generated']).
   directive('routerComponent', routerComponentDirective).
   directive('routerComponent', routerComponentFillContentDirective).
@@ -10,17 +12,23 @@ angular.module('ngFuturisticRouter', ['ngFuturisticRouter.generated']).
   directive('routerViewPort', routerViewPortDirective).
   directive('routerLink', routerLinkDirective);
 
-/*
+
+/**
+ * @name routerComponentDirective
+ *
+ * @description
  * A component is:
  * - a controller
  * - a template
  * - an optional router
  *
- * This directive makes it easy to group all of them into a single concept
+ * This directive makes it easy to group all of them into a single concept,
+ * and also knows how to pass...
  *
- *
+ * By default...
  */
-function routerComponentDirective($animate, $controller, $compile, $rootScope, $location, $templateRequest, router, componentLoader) {
+function routerComponentDirective($animate, $controller, $compile, $rootScope, $location,
+                                  $templateRequest, router, componentLoader) {
   $rootScope.$watch(function () {
     return $location.path();
   }, function (newUrl) {
@@ -29,8 +37,13 @@ function routerComponentDirective($animate, $controller, $compile, $rootScope, $
 
   var nav = router.navigate;
   router.navigate = function (url) {
-    return nav.call(this, url).then(function () {
-      $location.path(url);
+    return nav.call(this, url).then(function (newUrl) {
+      if (newUrl) {
+        // TODO: clean this up
+        var newestUrl = router.generate(newUrl[0].handler.component, newUrl[0].params);
+        //console.log(newestUrl, url, newUrl);
+        $location.path(url);
+      }
     });
   }
 
@@ -100,6 +113,9 @@ function routerComponentDirective($animate, $controller, $compile, $rootScope, $
 }
 
 
+/*
+ * This uses the same technique as ngInclude
+ */
 function routerComponentFillContentDirective($compile) {
   return {
     restrict: 'AE',
@@ -114,18 +130,20 @@ function routerComponentFillContentDirective($compile) {
 
 
 
-/*
- * ## `<router-view-port>`
- * Responsibile for wiring up stuff
- * needs to appear inside of a routerComponent
+/**
+ * @name routerViewPort
  *
- * Use:
+ * @description
+ * A routerViewPort is where resolved content goes.
+ *
+ * ## Use
+ * `<router-view-port>` needs to appear inside of a routerComponent
  *
  * ```html
  * <div router-view-port="name"></div>
  * ```
  *
- * The value for the routerViewComponent is optional
+ * The value for the `routerViewComponent` attribute is optional.
  */
 function routerViewPortDirective($animate, $compile, $templateRequest, componentLoader) {
   return {
@@ -180,7 +198,7 @@ function makeComponentString(name) {
   ].join('');
 }
 
-var SOME_RE = /^(.+?)(?:\((.*)\))?$/;
+var LINK_MICROSYNTAX_RE = /^(.+?)(?:\((.*)\))?$/;
 
 function routerLinkDirective(router, $location, $parse) {
   var rootRouter = router;
@@ -199,7 +217,7 @@ function routerLinkDirective(router, $location, $parse) {
     }
 
     var link = attrs.routerLink || '';
-    var parts = link.match(SOME_RE);
+    var parts = link.match(LINK_MICROSYNTAX_RE);
     var routeName = parts[1];
     var routeParams = parts[2];
     var url;
@@ -220,7 +238,7 @@ function routerLinkDirective(router, $location, $parse) {
         }, true);
       }
     } else {
-      url = router.generate(routeName);
+      url = '.' + router.generate(routeName);
       elt.attr('href', url);
     }
 
@@ -229,11 +247,15 @@ function routerLinkDirective(router, $location, $parse) {
       rootRouter.navigate(url);
     });
   }
-
 }
 
-/*
- * This lets you set up your ~conventions~
+
+/**
+ * @name componentLoaderProvider
+ * @type provider
+ * @description
+ *
+ * This lets you configure conventions for what controllers are named and where to load templates from.
  */
 function componentLoaderProvider() {
   var componentToCtrl = function componentToCtrlDefault(name) {
@@ -244,7 +266,7 @@ function componentLoaderProvider() {
 
   var componentToTemplate = function componentToTemplateDefault(name) {
     var dashName = dashCase(name);
-    return '/components/' + dashName + '/' + dashName + '.html';
+    return './components/' + dashName + '/' + dashName + '.html';
   };
 
   function componentLoader(name) {
@@ -333,6 +355,7 @@ function getDescriptors(object) {
   // }
   return descriptors;
 };
+
   "use strict";
   var RouteRecognizer = (function() {
     var map = (function() {
@@ -850,6 +873,7 @@ function getDescriptors(object) {
       }
     };
     RouteRecognizer.prototype.map = map;
+    RouteRecognizer.VERSION = 'VERSION_STRING_PLACEHOLDER';
     return RouteRecognizer;
   }());
   ;
@@ -864,7 +888,7 @@ function getDescriptors(object) {
     this.childRecognizer = new RouteRecognizer();
   };
   var $Router = Router;
-  ($traceurRuntime.createClass)(Router, {
+  (createClass)(Router, {
     childRouter: function() {
       var child = new $Router(this);
       this.children.push(child);
@@ -892,7 +916,11 @@ function getDescriptors(object) {
       } else if (!mapping.handler) {
         mapping.handler = {component: component};
       }
-      this.recognizer.add([mapping], {as: component});
+      if (mapping.cannonical === false) {
+        this.recognizer.add([mapping]);
+      } else {
+        this.recognizer.add([mapping], {as: component});
+      }
       var withChild = copy(mapping);
       withChild.path += CHILD_ROUTE_SUFFIX;
       this.childRecognizer.add([{

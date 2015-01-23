@@ -46,12 +46,13 @@ export class Router {
    *
    * @description
    * update the routing configuation and trigger a navigation
-   * 
+   *
    */
   config(mapping) {
     if (mapping instanceof Array) {
       return mapping.forEach(nav => this.config(nav));
     }
+
     var component = mapping.component;
 
     if (typeof component === 'string') {
@@ -62,7 +63,11 @@ export class Router {
       mapping.handler = { component: component };
     }
 
-    this.recognizer.add([mapping], { as: component });
+    if (mapping.cannonical === false) {
+      this.recognizer.add([mapping]);
+    } else {
+      this.recognizer.add([mapping], { as: component });
+    }
 
     var withChild = copy(mapping);
     withChild.path += CHILD_ROUTE_SUFFIX;
@@ -136,6 +141,10 @@ export class Router {
                .then(() => this.previousContext = context);
   }
 
+  /**
+   * @name renavigate
+   * @description like "refresh"
+   */
   renavigate() {
     if (this.navigating) {
       return Promise.resolve();
@@ -190,7 +199,7 @@ export class Router {
 
 
   /**
-   * 
+   *
    * given a context obj
    * returns a Promise<bool> that represents
    * whether this router and all the descendants can navigate

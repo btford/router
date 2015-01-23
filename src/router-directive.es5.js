@@ -37,8 +37,13 @@ function routerComponentDirective($animate, $controller, $compile, $rootScope, $
 
   var nav = router.navigate;
   router.navigate = function (url) {
-    return nav.call(this, url).then(function () {
-      $location.path(url);
+    return nav.call(this, url).then(function (newUrl) {
+      if (newUrl) {
+        // TODO: clean this up
+        var newestUrl = router.generate(newUrl[0].handler.component, newUrl[0].params);
+        //console.log(newestUrl, url, newUrl);
+        $location.path(url);
+      }
     });
   }
 
@@ -127,7 +132,7 @@ function routerComponentFillContentDirective($compile) {
 
 /**
  * @name routerViewPort
- * 
+ *
  * @description
  * A routerViewPort is where resolved content goes.
  *
@@ -233,7 +238,7 @@ function routerLinkDirective(router, $location, $parse) {
         }, true);
       }
     } else {
-      url = router.generate(routeName);
+      url = '.' + router.generate(routeName);
       elt.attr('href', url);
     }
 
@@ -250,7 +255,7 @@ function routerLinkDirective(router, $location, $parse) {
  * @type provider
  * @description
  *
- * This lets you configure conventions for what controllers are named and where to load templates from
+ * This lets you configure conventions for what controllers are named and where to load templates from.
  */
 function componentLoaderProvider() {
   var componentToCtrl = function componentToCtrlDefault(name) {

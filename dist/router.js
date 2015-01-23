@@ -45,7 +45,11 @@ define(["assert", 'route-recognizer'], function($__0,$__2) {
       } else if (!mapping.handler) {
         mapping.handler = {component: component};
       }
-      this.recognizer.add([mapping], {as: component});
+      if (mapping.cannonical === false) {
+        this.recognizer.add([mapping]);
+      } else {
+        this.recognizer.add([mapping], {as: component});
+      }
       var withChild = copy(mapping);
       withChild.path += CHILD_ROUTE_SUFFIX;
       this.childRecognizer.add([{

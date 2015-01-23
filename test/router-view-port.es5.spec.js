@@ -53,7 +53,7 @@ describe('routerViewPort', function () {
   }));
 
 
-  it('should transition between components with different parameters', inject(function (router) {
+  it('should navigate between components with different parameters', inject(function (router) {
     router.config([
       { path: '/user/:name', component: 'user' }
     ]);
@@ -85,28 +85,27 @@ describe('routerViewPort', function () {
   }));
 
 
-  it('should give child components child routers', inject(function (router) {
-    var childCtrlRouter;
+  it('should work with nested viewports', inject(function (router) {
 
+    put('childRouter', '<div>inner { <div router-view-port></div> }</div>');
     $controllerProvider.register('ChildRouterController', function (router) {
-      childCtrlRouter = router;
       router.config([
         { path: '/b', component: 'one' }
       ]);
     });
 
     put('router', '<div>outer { <div router-view-port></div> }</div>');
-    put('childRouter', '<div>inner { <div router-view-port></div> }</div>');
-
     router.config([
       { path: '/a', component: 'childRouter' }
     ]);
+
     compile('<router-component component-name="router"></router-component>');
 
     router.navigate('/a/b');
-    $rootScope.$digest();
+    $rootScope.$digest(true);
 
     expect(elt.text()).toBe('outer { inner { one } }');
+    //console.log(elt.html());
   }));
 
 
@@ -123,7 +122,7 @@ describe('routerViewPort', function () {
     router.navigate('/a');
     $rootScope.$digest();
 
-    expect(elt.find('a').attr('href')).toBe('/b');
+    expect(elt.find('a').attr('href')).toBe('./b');
   }));
 
 
@@ -199,7 +198,6 @@ describe('routerViewPort', function () {
 
     router.navigate('/a');
     $rootScope.$digest();
-
     expect(spy).not.toHaveBeenCalled();
     expect(elt.text()).toBe('outer {  }');
   }));
@@ -260,14 +258,34 @@ describe('routerViewPort', function () {
     compile('<router-component component-name="router"></router-component>');
 
     router.config([
-      { path: '/', component: 'user' }
+      { path: '/user', component: 'user' }
     ]);
 
-    spyOn($location, 'path').and.callThrough();
+    router.navigate('/user');
+    $rootScope.$digest();
+
+    expect($location.path()).toBe('/user');
+  }));
+
+  // TODO: location path base href
+  /*
+  it('should change the location according to...', fuction () {
+    expect('').toBe('');
+  });
+  */
+
+  it('should change location to the cannonical route', inject(function (router, $location) {
+    compile('<router-component component-name="router"></router-component>');
+
+    router.config([
+      { path: '/',     component: 'user', cannonical: false },
+      { path: '/user', component: 'user' }
+    ]);
+
     router.navigate('/');
     $rootScope.$digest();
 
-    expect($location.path).toHaveBeenCalledWith('/');
+    expect($location.path()).toBe('/user');
   }));
 
 
