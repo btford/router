@@ -321,6 +321,12 @@ describe('routerViewPort', function () {
     expect(elt.text()).toBe('inner { two }');
   }));
 
+  /*
+  // TODO
+  it('should use expose the component's controller with "controller as"', function () {
+  });
+  */
+
 
   it('should navigate when the location path changes', inject(function (router, $location) {
     router.config([
